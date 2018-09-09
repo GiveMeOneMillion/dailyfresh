@@ -1,0 +1,77 @@
+{%extends 'df_goods/base.html'%}
+{%block script%}
+<script>
+	$(function () {
+	    var order_by = parseInt({{order_by}})-1;
+		$('.sort_bar a').eq(order_by).addClass('active')
+    });
+	function add_cart(gid) {
+		$.get('/user/islogin/',function (data) {
+			if (data.islogin==1){
+			    $.get('/user/add/',{'gid':gid,'count':1},function (data) {
+					if(data.isok==1){
+					    alert('加入购物车成公');
+					    $('#show_count').text(data.count);
+					}
+                })
+			}else{
+			    location.href='/user/login/'
+			}
+        })
+    }
+</script>
+{%endblock script%}
+
+{%block breadcrumd%}
+
+	<div class="breadcrumb">
+		<a href="#">全部分类</a>
+		<span>></span>
+		<a href="#">{{type.ttitle}}</a>
+	</div>
+{%endblock breadcrumd%}
+
+{%block r_wrap%}
+
+<div class="r_wrap fr clearfix">
+			<div class="sort_bar">
+				<a href="/list{{type.id}}_1_1/" >默认</a>
+				<a href="/list{{type.id}}_1_2/" >价格</a>
+				<a href="/list{{type.id}}_1_3/" >人气</a>
+			</div>
+
+			<ul class="goods_type_list clearfix">
+				{%for p in page%}
+				<li>
+					<a href="/{{p.id}}/"><img src="/static/{{p.gpic}}"></a>
+					<h4><a href="/{{p.id}}/">{{p.gtitle}}</a></h4>
+					<div class="operate">
+						<span class="prize">￥{{p.gprice}}</span>
+						<span class="unit">{{p.gunit}}</span>
+						<a href="javascript:add_cart({{p.id}});" class="add_goods" title="加入购物车"></a>
+					</div>
+				</li>
+				{%endfor%}
+			</ul>
+		<div class="pagenation">
+				{%if page.has_previous%}
+				<a href="/list{{type.id}}_1_{{order_by}}/">首页</a>
+				<a href="/list{{type.id}}_{{page.number|add:-1}}_{{order_by}}/"><上一页</a>
+				{%endif%}
+
+				{%for pn in plist%}
+					{%if pn == page.number%}
+					<a href="#" class="active">{{pn}}</a>
+					{%else%}
+					<a href="/list{{type.id}}_{{pn}}_{{order_by}}/">{{pn}}</a>
+					{%endif%}
+				{%endfor%}
+
+				{%if page.has_next%}
+				<a href="/list{{type.id}}_{{page.number|add:1}}_{{order_by}}/"><下一页</a>
+				<a href="/list{{type.id}}_{{page.paginator.num_pages}}_{{order_by}}/">末页</a>
+				{%endif%}
+			</div>
+		</div>
+	{%endblock r_wrap%}
+

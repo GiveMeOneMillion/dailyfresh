@@ -1,0 +1,124 @@
+{%extends 'df_goods/base.html'%}
+{%block script%}
+<script>
+	$(function () {
+		$('.num_show').blur(function () {
+			var num=parseInt($(this).val());
+			if (isNaN(num)){
+			    num=1;
+            }
+			if (num<=0){
+			    num=1;
+			}
+			var kucun =parseInt($('#kucun').val());
+			if (num>=kucun){
+			    num=kucun
+			}
+			var price = parseFloat($('.show_pirze em').text());
+			var total = num*price;
+			$('.total em').text(total.toFixed(2)+'元');
+			$(this).val(num);
+        });
+		$('.add').click(function () {
+			var num = parseInt($('.num_show').val());
+			num++;
+			$('.num_show').val(num).blur();
+        });
+		$('.minus').click(function () {
+			var num = parseInt($('.num_show').val());
+			num--;
+			$('.num_show').val(num).blur();
+        });
+
+		$('#add_cart').click(function () {
+		    var gid =$('#gid').val();
+			var count=$('.num_show').val();
+			$.get('/user/islogin/',function (data) {
+				if (data.islogin==1){
+				    $.get('/cart/add/',{'gid':gid,'count':count},function (data) {
+				if(data.isok == 1){
+                    var $add_x = $('#add_cart').offset().top;
+                    var $add_y = $('#add_cart').offset().left;
+
+                    var $to_x = $('#show_count').offset().top;
+                    var $to_y = $('#show_count').offset().left;
+
+                    $(".add_jump").css({'left': $add_y + 80, 'top': $add_x + 10, 'display': 'block'})
+                    $('#add_cart').click(function () {
+                        $(".add_jump").stop().animate({
+                                'left': $to_y + 7,
+                                'top': $to_x + 7
+                            },
+                            "fast", function () {
+                                $(".add_jump").fadeOut('fast');
+								$('#show_count').text(data.count);
+                            });
+                    })
+                }
+            })
+				}else {
+				    location.href='/usre/login/';
+				}
+            });
+        });
+    });
+</script>
+{%endblock script%}
+
+{%block breadcrumd%}
+
+	<div class="breadcrumb">
+		<a href="#">全部分类</a>
+		<span>></span>
+		<a href="#">{{goods.gtype.ttitle}}</a>
+		<span>></span>
+		<a href="#">商品详情
+			<input type="hidden" id="gid" value="{{goods.id}}">
+		</a>
+	</div>
+
+	<div class="goods_detail_con clearfix">
+		<div class="goods_detail_pic fl"><img src="/static/{{goods.gpic}}"></div>
+
+		<div class="goods_detail_list fr">
+			<h3>{{goods.gtitle}}</h3>
+			<p>{{goods.gjianjie}}</p>
+			<div class="prize_bar">
+				<span class="show_pirze">¥<em>{{goods.gprice}}</em></span>
+				<span class="show_unit">单  位：{{goods.gunit}}</span>
+			</div>
+			<div class="goods_num clearfix">
+				<div class="num_name fl">数 量：</div>
+				<div class="num_add fl">
+					<input type="hidden" value="{{goods.gkucun}}" id="kucun">
+					<input type="text" class="num_show fl" value="1">
+					<a href="javascript:;" class="add fr">+</a>
+					<a href="javascript:;" class="minus fr">-</a>	
+				</div> 
+			</div>
+			<div class="total">总价：<em>{{goods.gprice}}</em></div>
+			<div class="operate_btn">
+				<a href="javascript:;" class="buy_btn">立即购买</a>
+				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>				
+			</div>
+		</div>
+	</div>
+	{%endblock breadcrumd%}
+
+
+		{%block r_wrap%}
+		<div class="r_wrap fr clearfix">
+			<ul class="detail_tab clearfix">
+				<li class="active">商品介绍</li>
+				<li>评论</li>
+			</ul>
+
+			<div class="tab_content">
+				{{goods.gcontent|safe}}
+			</div>
+
+		</div>
+
+
+	<div class="add_jump"></div>
+{%endblock r_wrap%}
